@@ -41,6 +41,11 @@ def add_record_to_new_sheet(record_list):
     now_for_title = now.strftime('%Y/%m/%d')
     book.add_worksheet(now_for_title, rows = 100, cols = 4)
 
+def make_num(price_info):
+    price_info[1] = int(price_info[1].replace("円", "").replace(",", ""))
+    price_info[2] = int(price_info[2].replace("円)", "").replace("(税込", "").replace(",", ""))
+    return price_info
+
 response_for_tanpin_tag = requests.get("https://www.yakiniku-king.jp/menu_all/tanpin/")
 all_tanpin_tag = BeautifulSoup(response_for_tanpin_tag.content, 'html.parser').select('a[href*="menu_all/tanpin"]')
 all_href_list = list(map(lambda x: "https://www.yakiniku-king.jp" + x.get('href'), all_tanpin_tag))
@@ -62,5 +67,6 @@ for url in kikan_gentei_tag_href_list:
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
     item_name_list.append(list(map(lambda x: "".join(x.text.split()), soup.select("div.menuSelectTtl, div.price span"))))
+item_name_list_using_num = list(map(make_num, item_name_list))
 print(item_name_list)
-add_price_to_sheet(item_name_list)
+# add_price_to_sheet(item_name_list)
