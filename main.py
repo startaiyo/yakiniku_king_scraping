@@ -20,11 +20,16 @@ all_tanpin_tag = BeautifulSoup(response_for_tanpin_tag.content, 'html.parser').s
 all_href_list = list(map(lambda x: "https://www.yakiniku-king.jp" + x.get('href'), all_tanpin_tag))
 tanpin_tag_href_list = list(filter(lambda x: not x.replace("/","").endswith("tanpin"), all_href_list))
 # print(tanpin_tag_href_list)
-item_name_list = []
-for url in tanpin_tag_href_list:
-    time.sleep(0.5)
-    r = requests.get("https://www.yakiniku-king.jp/menu_all/tanpin/domestic_beef/")
-    soup = BeautifulSoup(r.content, 'html.parser')
-    item_name_list.extend(list(split_list(list(map(lambda x: x.text, soup.select("div.item_description h2, div.item_description span"))),3)))
-print(item_name_list)
+# item_name_list = []
+# for url in tanpin_tag_href_list:
+#     time.sleep(0.5)
+#     r = requests.get("https://www.yakiniku-king.jp/menu_all/tanpin/domestic_beef/")
+#     soup = BeautifulSoup(r.content, 'html.parser')
+#     item_name_list.extend(list(split_list(list(map(lambda x: x.text, soup.select("div.item_description h2, div.item_description span"))),3)))
+# print(item_name_list)
+response_for_kikan_gentei = requests.get("https://www.yakiniku-king.jp/menu_all/season/")
+all_kikan_gentei = BeautifulSoup(response_for_kikan_gentei.content, 'html.parser').select('a[href*="menu_all/season"]')
+all_href_list_kikan_gentei = list(set(list(map(lambda x: "https://www.yakiniku-king.jp" + x.get('href'), all_kikan_gentei))))
+kikan_gentei_tag_href_list = list(filter(lambda x: not x.replace("/","").endswith("season"), all_href_list_kikan_gentei))
+print(kikan_gentei_tag_href_list)
 
