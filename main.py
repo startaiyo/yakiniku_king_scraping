@@ -33,6 +33,7 @@ def split_list(l, n):
 def add_price_to_sheet(item_list):
     price_sheet = book.worksheet('値段リスト')
     price_sheet.clear()
+    item_list = [["品名", "本体価格", "税込み価格"]] + item_list
     price_sheet.append_rows(item_list)
 
 def add_record_to_new_sheet(record_list):
@@ -68,5 +69,5 @@ for url in kikan_gentei_tag_href_list:
     soup = BeautifulSoup(r.content, 'html.parser')
     item_name_list.append(list(map(lambda x: "".join(x.text.split()), soup.select("div.menuSelectTtl, div.price span"))))
 item_name_list_using_num = list(map(make_num, item_name_list))
-print(item_name_list)
-# add_price_to_sheet(item_name_list)
+add_price_to_sheet(item_name_list)
+print("complete!")
