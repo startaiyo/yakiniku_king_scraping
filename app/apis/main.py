@@ -41,11 +41,19 @@ def add_price_to_sheet(item_list):
     item_list = [["品名", "本体価格", "税込み価格", "ジャンル"]] + item_list
     price_sheet.append_rows(item_list)
 
-# def add_record_to_new_sheet(record_list):
-#     DIFF_JST_FROM_UTC = 9
-#     now = datetime.datetime.utcnow() + datetime.timedelta(hours=DIFF_JST_FROM_UTC)
-#     now_for_title = now.strftime('%Y/%m/%d')
-#     book.add_worksheet(now_for_title, rows = 100, cols = 4)
+def add_record_to_new_sheet(record_list):
+    DIFF_JST_FROM_UTC = 9
+    now = datetime.datetime.utcnow() + datetime.timedelta(hours=DIFF_JST_FROM_UTC)
+    now_for_title = now.strftime('%Y/%m/%d')
+    exist_worksheets = list(map(lambda x: x.title, book.worksheets()))
+    if exist_worksheets.index(now_for_title) > 0:
+        new_worksheet = book.worksheet(now_for_title)
+    else:
+        new_worksheet = book.add_worksheet(now_for_title, rows = 100, cols = 4)
+    filtered_record_list = list(filter(lambda x: x[4] != '0', record_list))
+    print(filtered_record_list)
+    new_worksheet.append_rows(filtered_record_list)
+
 
 def make_num(price_info):
     price_info[1] = int(price_info[1].replace("円", "").replace(",", ""))
@@ -63,9 +71,9 @@ def show_menu():
         for key, value in request.form.items():
             if value != "":
                 result_sets.append(key.split(",") + [value])
-        print(result_sets)
+        add_record_to_new_sheet(result_sets)
     menu_sheet = book.worksheet('値段リスト')
-    menu_list = menu_sheet.get_all_values()
+    menu_list = menu_sheet.get_all_values()[1:]
     return render_template('index.html', data = menu_list)
 
 @api.route('/api/renew')
