@@ -5,7 +5,7 @@ import pandas as pd
 import time
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import datetime
+from datetime import timedelta, datetime as dt
 from flask import Blueprint, jsonify, request, render_template
 
 api = Blueprint('main', __name__, url_prefix = '/yakiniku_king')
@@ -41,12 +41,10 @@ def add_price_to_sheet(item_list):
     item_list = [["品名", "本体価格", "税込み価格", "ジャンル"]] + item_list
     price_sheet.append_rows(item_list)
 
-def add_record_to_new_sheet(record_list):
-    DIFF_JST_FROM_UTC = 9
-    now = datetime.datetime.utcnow() + datetime.timedelta(hours=DIFF_JST_FROM_UTC)
-    now_for_title = now.strftime('%Y/%m/%d')
+def add_record_to_new_sheet(record_list, date):
+    now_for_title = date
     exist_worksheets = list(map(lambda x: x.title, book.worksheets()))
-    if exist_worksheets.index(now_for_title) > 0:
+    if now_for_title in exist_worksheets:
         new_worksheet = book.worksheet(now_for_title)
     else:
         new_worksheet = book.add_worksheet(now_for_title, rows = 100, cols = 4)
@@ -68,10 +66,16 @@ def render_page():
 def show_menu():
     if request.method == 'POST':
         result_sets = []
+        DIFF_JST_FROM_UTC = 9
+        date = (dt.utcnow() + timedelta(hours=DIFF_JST_FROM_UTC)).strftime('%Y-%m-%d')
         for key, value in request.form.items():
-            if value != "":
+            if value != "" and key != "date":
                 result_sets.append(key.split(",") + [value])
-        add_record_to_new_sheet(result_sets)
+                print(result_sets)
+            if key == "date":
+                date = value
+                print(value)
+        add_record_to_new_sheet(result_sets, date)
     menu_sheet = book.worksheet('値段リスト')
     menu_list = menu_sheet.get_all_values()[1:]
     return render_template('index.html', data = menu_list)
